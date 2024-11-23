@@ -12,13 +12,7 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
     is_active = models.BooleanField(default=True)
-    bio = models.TextField(null=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True)
-    role = models.CharField(max_length=35, default="user")
-    difficulty_level = models.PositiveSmallIntegerField(
-        validators=[MaxValueValidator(255), ],
-        default=100,
-    )
+    role = models.CharField(max_length=45, default="user")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
