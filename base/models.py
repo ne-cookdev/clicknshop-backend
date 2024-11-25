@@ -35,11 +35,11 @@ class Order(models.Model):
         ON_THE_WAY = 2, _("В пути")
         SHIPPED = 3, _("Доставлен")
 
+    number = models.IntegerField(primary_key=True)
     order_date = models.DateTimeField(auto_now_add=True, blank=False)
-    number = models.IntegerField(default=0, null=False, blank=False)
     status = models.IntegerField(choices=Status.choices, default=Status.CREATED, null=False, blank=False)
+    address = models.TextField(default="USER_ADDRESS", null=False, blank=False)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="order_user", null=False, blank=False)
-    warehouses = models.ManyToManyField(to="Warehouse", through="Shipment", related_name="orders")
 
     class Meta:
         db_table = 'order'
@@ -55,7 +55,7 @@ class OrderDetails(models.Model):
                               related_name="order_details", null=False, blank=False)
     product = models.ForeignKey(to="Product", on_delete=models.CASCADE,
                                 related_name="order_details", null=False, blank=False)
-    quantity = models.FloatField(default=0.0, null=False, blank=False)
+    quantity = models.IntegerField(default=0, null=False, blank=False)
     price_at_order = models.FloatField(default=0.0, null=False, blank=False)
 
     class Meta:
@@ -77,7 +77,7 @@ class Product(models.Model):
     length = models.FloatField(default=0.0, null=False, blank=False)
     image_ref = models.TextField(null=True, blank=True)
     category = models.ForeignKey(to="Category", on_delete=models.CASCADE,
-                                 related_name="product_category", null=False, blank=False)
+                                 related_name="products", null=False, blank=False)
     orders = models.ManyToManyField(to="Order", through="OrderDetails", related_name="products")
     warehouses = models.ManyToManyField(to="Warehouse", through="Stock", related_name="products")
 
@@ -95,13 +95,11 @@ class Shipment(models.Model):
         ON_THE_WAY = 1, _("В пути")
         SHIPPED = 2, _("Доставлен")
 
-    warehouse = models.ForeignKey(to="Warehouse", on_delete=models.CASCADE,
-                                  related_name="shipments", null=False, blank=False)
-    order = models.ForeignKey(to="Order", on_delete=models.CASCADE,
-                              related_name="shipments", null=False, blank=False)
+    order = models.OneToOneField(to="Order", on_delete=models.CASCADE,
+                                 related_name="shipment")
     carrier = models.ForeignKey(to="Carrier", on_delete=models.CASCADE,
                                 related_name="shipments", null=False, blank=False)
-    tracking_number = models.IntegerField(default=0, null=False, blank=False)
+    tracking_number = models.IntegerField(primary_key=True)
     status = models.IntegerField(choices=Status.choices, default=Status.ON_THE_WAY, null=False, blank=False)
 
     class Meta:
@@ -110,7 +108,7 @@ class Shipment(models.Model):
         verbose_name_plural = 'shipments'
 
     def __str__(self):
-        return f"Shipment for {self.order} from {self.warehouse}"
+        return f"Shipment for {self.order} by {self.carrier}"
 
 
 class Stock(models.Model):
@@ -126,13 +124,12 @@ class Stock(models.Model):
         verbose_name_plural = 'stocks'
 
     def __str__(self):
-        return f"{self.product} remained {self.warehouse}"
+        return f"{self.quantity} {self.product}s remained in {self.warehouse}"
 
 
 class Warehouse(models.Model):
     name = models.CharField(max_length=45, default="WAREHOUSE_NAME", null=False, blank=False)
     location = models.TextField(default="WAREHOUSE_LOCATION", null=False, blank=False)
-    capacity = models.FloatField(default=0.0, null=False, blank=False)
 
     class Meta:
         db_table = 'warehouse'
