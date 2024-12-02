@@ -26,6 +26,14 @@ class RegistrationAPIView(APIView):
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             self.user = serializer.save()
+            role = None
+            if not self.user.is_staff:
+                role = "user"
+            else:
+                if not self.user.is_superuser:
+                    role = "admin"
+                else:
+                    role = "superuser"
             refresh = RefreshToken.for_user(self.user)
             refresh.payload.update({
                 'user_id': self.user.id,
@@ -34,6 +42,7 @@ class RegistrationAPIView(APIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'role': str(role),
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,6 +58,14 @@ class LoginAPIView(APIView):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.user
+            role = None
+            if not self.user.is_staff:
+                role = "user"
+            else:
+                if not self.user.is_superuser:
+                    role = "admin"
+                else:
+                    role = "superuser"
             refresh = RefreshToken.for_user(user)
             refresh.payload.update({
                 'user_id': user.id,
@@ -57,6 +74,7 @@ class LoginAPIView(APIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'role': str(role),
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
