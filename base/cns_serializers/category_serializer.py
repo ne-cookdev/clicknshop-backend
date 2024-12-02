@@ -1,17 +1,11 @@
 from rest_framework import serializers
 
-from ..models import Product, Category
-
-
-class _ProductInCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['id', 'name']
-        extra_kwargs = {'name': {'read_only': True}, }
+from .sharing_serializers import _ProductCardInfoSerializer
+from ..models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    products = _ProductInCategorySerializer(many=True, read_only=True)
+    products = _ProductCardInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Category

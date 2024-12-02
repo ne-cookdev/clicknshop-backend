@@ -2,17 +2,12 @@ import random
 
 from rest_framework import serializers
 
+from .sharing_serializers import _ProductCardInfoSerializer, _UserSerializer
 from ..models import Order, OrderDetails, Product
 
 
-class _GetProductsInOrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['id', 'name']
-
-
 class _OrderDetailsInOrderSerializer(serializers.ModelSerializer):
-    product = _GetProductsInOrderSerializer(read_only=True)
+    product = _ProductCardInfoSerializer(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(
         required=True, queryset=Product.objects.all(), source='product', write_only=True
     )
@@ -24,7 +19,7 @@ class _OrderDetailsInOrderSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     order_details = _OrderDetailsInOrderSerializer(many=True, required=True)
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    user = _UserSerializer(read_only=True)
 
     class Meta:
         model = Order
