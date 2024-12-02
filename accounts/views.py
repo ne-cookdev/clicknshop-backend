@@ -26,7 +26,6 @@ class RegistrationAPIView(APIView):
         serializer = RegisterUserSerializer(data=request.data)
         if serializer.is_valid():
             self.user = serializer.save()
-            role = None
             if not self.user.is_staff:
                 role = "user"
             else:
@@ -58,11 +57,10 @@ class LoginAPIView(APIView):
         serializer = LoginUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.user
-            role = None
-            if not self.user.is_staff:
+            if not user.is_staff:
                 role = "user"
             else:
-                if not self.user.is_superuser:
+                if not user.is_superuser:
                     role = "admin"
                 else:
                     role = "superuser"
