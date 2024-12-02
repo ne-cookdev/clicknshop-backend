@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from .product_serializer import ProductSerializer
 from ..models import Warehouse, Product, Stock
 
 
@@ -8,14 +9,8 @@ class _SetProductsInWarehouse(serializers.Serializer):
     quantity = serializers.IntegerField(required=True, min_value=0)
 
 
-class _GetProductsInWarehouseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['id', 'name']
-
-
 class _StockSerializer(serializers.ModelSerializer):
-    product = _GetProductsInWarehouseSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
 
     class Meta:
         model = Stock
