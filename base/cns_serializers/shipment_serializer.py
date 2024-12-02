@@ -42,4 +42,5 @@ class ShipmentSerializer(serializers.ModelSerializer):
                 instance.order.status = Order.Status.SHIPPED
         instance.status = validated_data.get('status', instance.status)
         instance.carrier = validated_data.get('carrier', instance.carrier)
+        instance.save()
         return instance
