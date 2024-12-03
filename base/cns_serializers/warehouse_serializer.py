@@ -59,4 +59,5 @@ class WarehouseSerializer(serializers.ModelSerializer):
             Stock.objects.bulk_create(stock_entries)
         instance.name = validated_data.get('name', instance.name)
         instance.location = validated_data.get('location', instance.location)
+        instance.save()
         return instance
